@@ -1,2 +1,6 @@
 *.aar
 /android/4x/SearchLite/app/libs/heresdk-lite-mock-4.9.3.0.7153.jar
+.gradle
+.idea
+build
+/android/4x/MapItems/app/libs/heresdk-explore-mock-4.10.1.0.7757.jar

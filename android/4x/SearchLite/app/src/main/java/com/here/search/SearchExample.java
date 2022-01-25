@@ -45,7 +45,10 @@ import com.here.sdk.mapviewlite.PickMapItemsCallback;
 import com.here.sdk.mapviewlite.PickMapItemsResult;
 import com.here.sdk.search.Address;
 import com.here.sdk.search.AddressQuery;
+import com.here.sdk.search.CategoryQuery;
 import com.here.sdk.search.Place;
+import com.here.sdk.search.PlaceCategory;
+import com.here.sdk.search.PlaceType;
 import com.here.sdk.search.SearchCallback;
 import com.here.sdk.search.SearchEngine;
 import com.here.sdk.search.SearchError;
@@ -53,6 +56,7 @@ import com.here.sdk.search.SearchOptions;
 import com.here.sdk.search.SuggestCallback;
 import com.here.sdk.search.Suggestion;
 import com.here.sdk.search.TextQuery;
+import com.here.sdk.search.WebImage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,8 +176,10 @@ public class SearchExample {
                     if (customMetadataValue != null) {
                         SearchResultMetadata searchResultMetadata = (SearchResultMetadata) customMetadataValue;
                         String title = searchResultMetadata.searchResult.getTitle();
+                        List<WebImage> imgs = searchResultMetadata.searchResult.getDetails().images;
+                        PlaceType plType = searchResultMetadata.searchResult.getPlaceType();
                         String vicinity = searchResultMetadata.searchResult.getAddress().addressText;
-                        showDialog("Picked Search Result",title + ". Vicinity: " + vicinity);
+                        showDialog("Picked Search Result",title + "\ntype: "+ plType.toString() + "\ncount images: "+imgs.size()+"\nVicinity: " + vicinity);
                         return;
                     }
                 }
@@ -190,9 +196,12 @@ public class SearchExample {
         clearMap();
 
         GeoBox viewportGeoBox = getMapViewGeoBox();
-        TextQuery query = new TextQuery(queryString, viewportGeoBox);
+        GeoCoordinates mapCenter = getMapViewCenter();
+        //TextQuery query = new TextQuery("", viewportGeoBox);
+        List<PlaceCategory> emptyCat = new ArrayList<>(); //then search by all categories
+        CategoryQuery query = new CategoryQuery(emptyCat, mapCenter, viewportGeoBox);
 
-        int maxItems = 30;
+        int maxItems = 100;
         SearchOptions searchOptions = new SearchOptions(LanguageCode.EN_US, maxItems);
 
         searchEngine.search(query, searchOptions, new SearchCallback() {
