@@ -22,7 +22,10 @@ package com.here.search;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
+
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -46,6 +49,7 @@ import com.here.sdk.mapviewlite.PickMapItemsResult;
 import com.here.sdk.search.Address;
 import com.here.sdk.search.AddressQuery;
 import com.here.sdk.search.CategoryQuery;
+import com.here.sdk.search.Details;
 import com.here.sdk.search.Place;
 import com.here.sdk.search.PlaceCategory;
 import com.here.sdk.search.PlaceType;
@@ -60,6 +64,8 @@ import com.here.sdk.search.WebImage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class SearchExample {
 
@@ -159,6 +165,7 @@ public class SearchExample {
     private void pickMapMarker(final Point2D point2D) {
         float radiusInPixel = 2;
         mapView.pickMapItems(point2D, radiusInPixel, new PickMapItemsCallback() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onMapItemsPicked(@Nullable PickMapItemsResult pickMapItemsResult) {
                 if (pickMapItemsResult == null) {
@@ -176,10 +183,13 @@ public class SearchExample {
                     if (customMetadataValue != null) {
                         SearchResultMetadata searchResultMetadata = (SearchResultMetadata) customMetadataValue;
                         String title = searchResultMetadata.searchResult.getTitle();
-                        List<WebImage> imgs = searchResultMetadata.searchResult.getDetails().images;
+                        Details details = searchResultMetadata.searchResult.getDetails();
+                        List<WebImage> imgs = details.images;
+                        List<PlaceCategory> plCats = details.categories;
+                        String strCats = plCats.stream().collect(Collectors.mapping(PlaceCategory::getName, Collectors.joining(",\n")));
                         PlaceType plType = searchResultMetadata.searchResult.getPlaceType();
                         String vicinity = searchResultMetadata.searchResult.getAddress().addressText;
-                        showDialog("Picked Search Result",title + "\ntype: "+ plType.toString() + "\ncount images: "+imgs.size()+"\nVicinity: " + vicinity);
+                        showDialog("Picked Search Result",title + "\ntype: "+ plType.toString() + "\nCategories: "+ strCats + "\ncount images: "+imgs.size()+"\nVicinity: " + vicinity);
                         return;
                     }
                 }
